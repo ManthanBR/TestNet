@@ -1,10 +1,44 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Switching Between Front and Back Cameras</title>
+    <style>
+      /* Ensure the canvas fills the entire screen */
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background: #000;
+      }
+
+      #canvas {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+      }
+
+      /* Optional styling for the flip button */
+      #flip {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <span id="flip"></span>
+    <span id="flip">Flip Camera</span>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

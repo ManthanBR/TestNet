@@ -1,4 +1,4 @@
-import { 
+import {
   bootstrapCameraKit,
   CameraKitSession,
   createMediaStreamSource,
@@ -6,7 +6,7 @@ import {
 } from '@snap/camera-kit';
 
 const liveRenderTarget = document.getElementById('canvas') as HTMLCanvasElement;
-const flipCamera = document.getElementById('flip') as HTMLElement | null;
+const flipCamera = document.getElementById('flip') as HTMLButtonElement; // Use the correct type
 
 let isBackFacing = true;
 let mediaStream: MediaStream;
@@ -17,28 +17,23 @@ async function init() {
   });
 
   const session = await cameraKit.createSession({ liveRenderTarget });
-  const lens = await cameraKit.lensRepository.loadLens(
-    '6c424c08-be3b-45e5-9f22-98a3d503bcd8',
-    '276ddfa1-5fbe-4099-aaaf-ceb9c81bb17f'
-  );
+  const { lenses } = await cameraKit.lensRepository.loadLensGroups([
+    '276ddfa1-5fbe-4099-aaaf-ceb9c81bb17f',
+  ]);
 
-  session.applyLens(lens);
+  session.applyLens(lenses[0]);
 
   bindFlipCamera(session);
 }
 
 function bindFlipCamera(session: CameraKitSession) {
-  // Null check to ensure flipCamera exists before accessing it
-  if (!flipCamera) {
-    console.error('Flip Camera button not found');
-    return;
+  if (flipCamera) {  // Check if flipCamera is not null
+    flipCamera.style.cursor = 'pointer';
+
+    flipCamera.addEventListener('click', () => {
+      updateCamera(session);
+    });
   }
-
-  flipCamera.style.cursor = 'pointer';
-
-  flipCamera.addEventListener('click', () => {
-    updateCamera(session);
-  });
 
   updateCamera(session);
 }
@@ -46,7 +41,6 @@ function bindFlipCamera(session: CameraKitSession) {
 async function updateCamera(session: CameraKitSession) {
   isBackFacing = !isBackFacing;
 
-  // Update the button text based on the camera
   if (flipCamera) {
     flipCamera.innerText = isBackFacing
       ? 'Switch to Front Camera'
@@ -58,7 +52,6 @@ async function updateCamera(session: CameraKitSession) {
     mediaStream.getVideoTracks()[0].stop();
   }
 
-  // Request media stream with appropriate facingMode for front or back camera
   mediaStream = await navigator.mediaDevices.getUserMedia({
     video: {
       facingMode: isBackFacing ? 'environment' : 'user',
@@ -66,13 +59,11 @@ async function updateCamera(session: CameraKitSession) {
   });
 
   const source = createMediaStreamSource(mediaStream, {
-    // Set cameraType to "environment" or "user" instead of "back" or "front"
-    cameraType: isBackFacing ? 'environment' : 'user',
+    cameraType: isBackFacing ? 'environment' : 'user',  // Corrected camera type
   });
 
   await session.setSource(source);
 
-  // Mirror the video feed if using the front camera
   if (!isBackFacing) {
     source.setTransform(Transform2D.MirrorX);
   }
